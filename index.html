@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Test vue.js</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+</head>
+
+<body>
+
+<div class="container">
+    <br>
+
+    <script type="text/x-template" id="panier-template">
+        <div class="panel panel-primary">
+            <div class="panel-heading">Suivi des candidatures </div>
+            <table class="table table-bordered table-striped">
+                <thead>
+                <tr>
+                    <th class="col-sm-4">Nom de l'entreprise</th>
+                    <th class="col-sm-2">Date de candidature</th>
+                    <th class="col-sm-2">Candidature spontanée</th>
+                    <th class="col-sm-2">Total</th>
+                    <th class="col-sm-1"></th>
+                    <th class="col-sm-1"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="item in panier">
+                    <td>{{ item.article | capitalize }}</td>
+                    <td>{{ item.quantite }}</td>
+                    <td>{{ item.prix | devise '€' }}</td>
+                    <td>{{ item.quantite * item.prix | devise '€' }}</td>
+                    <td><button class="btn btn-info btn-block" v-on:click="modifier($index)"><i class="fa fa-edit fa-lg"></button></td>
+                    <td><button class="btn btn-danger btn-block" v-on:click="supprimer($index)"><i class="fa fa-trash-o fa-lg"></i></button></td>
+                </tr>
+                <tr>
+                    <td colspan="3"></td>
+                    <td><strong>{{ total | devise '€' }}</strong></td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td><input type="text" class="form-control" v-model="input.Entreprise | capitalize" v-el:modif placeholder="Nom de l'entreprise"></td>
+                    <td><input type="text" class="form-control" v-model="input.Date | capitalize" v-el:modif placeholder="Date de candidature"></td>
+                    <td><input type="text" class="form-control" v-model="input.spontanee | capitalize" v-el:modif placeholder="Candidature spontanée"></td>
+                    <td colspan="3"><button class="btn btn-primary btn-block" v-on:click="ajouter()">Ajouter</button></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </script>
+
+    <div id="tuto">
+        <panier :panier="panier"></panier>
+    </div>
+
+</div>
+
+<script src="http://cdn.jsdelivr.net/vue/1.0.10/vue.min.js"></script>
+
+<script>
+
+    Vue.component('panier', {
+        props: ['panier'],
+        template: '#panier-template',
+        data: function () {
+            return {
+                input: { article: '', quantite: 0, prix: 0 }
+            }
+        },
+        computed: {
+            total: function () {
+                var total = 0;
+                this.panier.forEach(function(el) {
+                    total += el.prix * el.quantite;
+                });
+                return total;
+            }
+        },
+        methods: {
+            ajouter: function() {
+                this.panier.push(this.input);
+                this.input = { article: '', quantite: 0, prix: 0 };
+            },
+            modifier: function(index) {
+                this.input = this.panier[index];
+                this.panier.splice(index, 1);
+                this.$$.modif.focus();
+            },
+            supprimer: function(index) {
+                this.panier.splice(index, 1);
+            },
+        },
+        filters: {
+            devise: function(valeur, symbole) {
+                return valeur + ' ' + symbole;
+            },
+            entier: {
+                read: function(valeur) {
+                    return valeur;
+                },
+                write: function(nouvelleValeur, ancienneValeur, max) {
+                    var valeur = parseInt(nouvelleValeur);
+                    if(valeur % 1 === 0) {
+                        return valeur > max ? ancienneValeur : valeur;
+                    }
+                    return 0;
+                }
+            },
+            flottant: {
+                read: function(valeur) {
+                    return valeur;
+                },
+                write: function(nouvelleValeur, ancienneValeur) {
+                    return isNaN(nouvelleValeur) ? ancienneValeur : nouvelleValeur;
+                }
+            }
+        }
+    });
+
+    new Vue({
+        el: '#tuto',
+        data: {
+            panier: [
+                { article: "cahier", quantite: 2, prix: 5.30 },
+                { article: "crayon", quantite: 4, prix: 1.10 },
+                { article: "gomme", quantite: 1, prix: 3.25 }
+            ],
+        }
+    });
+
+</script>
+
+</body>
+
+</html>
